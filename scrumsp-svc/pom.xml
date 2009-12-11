@@ -1,0 +1,157 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.googlecode.scrumsp</groupId>
+    <artifactId>scrumsp-svc</artifactId>
+    <packaging>jar</packaging>
+    <version>${applVersion}</version>
+    <name>ScrumSP Services</name>
+
+    <parent>
+        <groupId>com.googlecode.scrumsp</groupId>
+        <artifactId>projects-base</artifactId>
+        <version>${applVersion}</version>
+    </parent>
+
+    <dependencies>
+        <!-- Web API -->
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-servlet_2.5_spec</artifactId>
+            <version>1.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-jta_1.1_spec</artifactId>
+            <version>1.1.1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.specs</groupId>
+            <artifactId>geronimo-jpa_3.0_spec</artifactId>
+            <version>1.1.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Data persistence APIs: JPA and JDO -->
+        <dependency>
+            <groupId>javax.jdo</groupId>
+            <artifactId>jdo2-api</artifactId>
+            <version>2.3-eb</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.datanucleus</groupId>
+            <artifactId>datanucleus-core</artifactId>
+            <version>1.1.5</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>transaction-api</artifactId>
+                    <groupId>javax.transaction</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.datanucleus</groupId>
+            <artifactId>datanucleus-jpa</artifactId>
+            <version>1.1.5</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.datanucleus</groupId>
+            <artifactId>datanucleus-appengine</artifactId>
+            <version>1.0.4.final</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Google App Engine -->
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api-1.0-sdk</artifactId>
+            <version>1.2.8</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api-labs</artifactId>
+            <version>1.2.8</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Spring framework -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>3.0.0.RC3</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>3.0.0.RC3</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- ScrumSp api -->
+        <dependency>
+            <groupId>com.googlecode.scrumsp</groupId>
+            <artifactId>scrumsp-api</artifactId>
+            <version>${applVersion}</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <defaultGoal>package</defaultGoal>
+
+        <plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>datanucleus-enhance</id>
+                        <phase>process-classes</phase>
+                        <configuration>
+                            <tasks>
+                                <property name="appengine.tools.classpath"
+                                    location="${appengine.sdk.root}/lib/appengine-tools-api.jar"/>
+                                <property name="dependency_classpath" refid="maven.dependency.classpath"/>
+
+                                <taskdef name="enhance" classname="com.google.appengine.tools.enhancer.EnhancerTask"
+                                    classpath="${appengine.tools.classpath}"/>
+                                <enhance failonerror="true" api="JDO">
+                                    <classpath>
+                                        <pathelement path="${appengine.tools.classpath}"/>
+                                        <pathelement path="${dependency_classpath}"/>
+                                        <pathelement path="target/classes"/>
+                                    </classpath>
+                                    <fileset dir="target/classes" includes="**/*.class"/>
+                                </enhance>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>Springframework milestone</id>
+            <url>http://maven.springframework.org/milestone</url>
+        </repository>
+    </repositories>
+
+</project>
