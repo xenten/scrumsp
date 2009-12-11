@@ -1,0 +1,81 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.googlecode.scrumsp</groupId>
+    <artifactId>scrumsp-gui</artifactId>
+    <packaging>war</packaging>
+    <version>${applVersion}</version>
+    <name>ScrumSP Client</name>
+
+    <parent>
+        <groupId>com.googlecode.scrumsp</groupId>
+        <artifactId>projects-base</artifactId>
+        <version>${applVersion}</version>
+    </parent>
+
+    <dependencies>
+        <!-- GWT client api -->
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${gwtVersion}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- ScrumSp api -->
+        <dependency>
+            <groupId>com.googlecode.scrumsp</groupId>
+            <artifactId>scrumsp-api</artifactId>
+            <version>${applVersion}</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <defaultGoal>package</defaultGoal>
+        <outputDirectory>war/WEB-INF/classes</outputDirectory>
+
+        <plugins>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${basedir}/war/META-INF</directory>
+                        </fileset>
+                        <fileset>
+                            <directory>${basedir}/war/WEB-INF/lib</directory>
+                        </fileset>
+                        <fileset>
+                            <directory>${basedir}/war/scrumsp</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <warSourceDirectory>${basedir}/war</warSourceDirectory>
+                    <webappDirectory>${basedir}/war</webappDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <configuration>
+                    <module>com.googlecode.scrumsp.Client</module>
+                    <webappDirectory>${basedir}/war</webappDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+     </build>
+
+</project>
