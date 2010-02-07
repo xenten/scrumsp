@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="mappings">
+            <value>
+            /greet=servlet.greetController
+            </value>
+        </property>
+    </bean>
+
+    <bean id="servlet.greetController" class="com.googlecode.scrumsp.web.internal.GwtRpcController">
+        <property name="remoteService">
+            <ref bean="main.greetingService" />
+        </property>
+    </bean>
+
+</beans>
