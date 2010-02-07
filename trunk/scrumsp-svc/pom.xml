@@ -4,7 +4,7 @@
 
     <groupId>com.googlecode.scrumsp</groupId>
     <artifactId>scrumsp-svc</artifactId>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
     <version>${applVersion}</version>
     <name>ScrumSP Services</name>
 
@@ -63,7 +63,7 @@
         <dependency>
             <groupId>org.datanucleus</groupId>
             <artifactId>datanucleus-appengine</artifactId>
-            <version>1.0.4.final</version>
+            <version>1.0.4.1.final</version>
             <scope>compile</scope>
         </dependency>
 
@@ -71,34 +71,74 @@
         <dependency>
             <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api-1.0-sdk</artifactId>
-            <version>1.2.8</version>
+            <version>${appengineVersion}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api-labs</artifactId>
-            <version>1.2.8</version>
+            <version>${appengineVersion}</version>
             <scope>compile</scope>
         </dependency>
 
-        <!-- Spring framework -->
+        <!-- Spring -->
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>3.0.0.RC3</version>
-            <scope>compile</scope>
+            <artifactId>org.springframework.context</artifactId>
+            <version>${spring.version}</version>
             <exclusions>
+                <!-- Exclude Commons Logging in favor of SLF4j -->
                 <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>com.springsource.org.apache.commons.logging</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <version>3.0.0.RC3</version>
-            <scope>compile</scope>
+            <artifactId>org.springframework.orm</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>org.springframework.web.servlet</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>org.springframework.aspects</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <!-- AspectJ -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>com.springsource.org.aspectj.weaver</artifactId>
+            <version>1.6.8.RELEASE</version>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>com.springsource.slf4j.api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>com.springsource.slf4j.org.apache.commons.logging</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>com.springsource.slf4j.log4j</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.log4j</groupId>
+            <artifactId>com.springsource.org.apache.log4j</artifactId>
+            <version>1.2.15</version>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- ScrumSp api -->
@@ -112,8 +152,38 @@
 
     <build>
         <defaultGoal>package</defaultGoal>
+        <finalName>scrumsp</finalName>
+        <outputDirectory>war/WEB-INF/classes</outputDirectory>
 
         <plugins>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${basedir}/war/META-INF</directory>
+                        </fileset>
+                        <fileset>
+                            <directory>${basedir}/war/WEB-INF/classes</directory>
+                        </fileset>
+                        <fileset>
+                            <directory>${basedir}/war/WEB-INF/lib</directory>
+                        </fileset>
+                        <fileset>
+                            <directory>${basedir}/war/scrumsp</directory>
+                        </fileset>
+                        <fileset>
+                            <directory>${basedir}/war/static</directory>
+                        </fileset>
+                        <fileset>
+                            <directory>${basedir}/war</directory>
+                            <includes>
+                                <include>**/index.html</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
@@ -132,9 +202,9 @@
                                     <classpath>
                                         <pathelement path="${appengine.tools.classpath}"/>
                                         <pathelement path="${dependency_classpath}"/>
-                                        <pathelement path="target/classes"/>
+                                        <pathelement path="war/WEB-INF/classes"/>
                                     </classpath>
-                                    <fileset dir="target/classes" includes="**/*.class"/>
+                                    <fileset dir="war/WEB-INF/classes" includes="**/*.class"/>
                                 </enhance>
                             </tasks>
                         </configuration>
@@ -144,13 +214,61 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-gwt</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.googlecode.scrumsp</groupId>
+                                    <artifactId>scrumsp-gui</artifactId>
+                                    <version>${applVersion}</version>
+                                    <type>war</type>
+                                    <outputDirectory>${basedir}/war</outputDirectory>
+                                    <includes>scrumsp/**,static/**,index.html</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <warSourceDirectory>${basedir}/war</warSourceDirectory>
+                    <webappDirectory>${basedir}/war</webappDirectory>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
+	<properties>
+		<spring.version>3.0.0.RELEASE</spring.version>
+		<slf4j.version>1.5.6</slf4j.version>
+	</properties>
+
     <repositories>
         <repository>
-            <id>Springframework milestone</id>
-            <url>http://maven.springframework.org/milestone</url>
+            <id>com.springsource.repository.bundles.release</id>
+            <name>SpringSource Enterprise Bundle Repository - SpringSource Releases</name>
+            <url>http://repository.springsource.com/maven/bundles/release</url>
+        </repository>
+        <repository>
+            <id>com.springsource.repository.bundles.external</id>
+            <name>SpringSource Enterprise Bundle Repository - External Releases</name>
+            <url>http://repository.springsource.com/maven/bundles/external</url>
+        </repository>
+        <repository>
+            <id>com.springsource.repository.bundles.milestone</id>
+            <name>SpringSource Enterprise Bundle Repository - SpringSource Milestones</name>
+            <url>http://repository.springsource.com/maven/bundles/milestone</url>
         </repository>
     </repositories>
 

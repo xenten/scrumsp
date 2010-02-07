@@ -1,20 +1,30 @@
 package com.googlecode.scrumsp.impl;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.googlecode.scrumsp.api.User;
+import javax.servlet.ServletContext;
+
+import org.springframework.web.context.ServletContextAware;
+
 import com.googlecode.scrumsp.api.GreetingService;
+import com.googlecode.scrumsp.api.User;
 
 /**
  * The server side implementation of the RPC service.
  */
-@SuppressWarnings("serial")
-public class GreetingServiceImpl extends RemoteServiceServlet implements
-		GreetingService {
+public class GreetingServiceImpl implements GreetingService, ServletContextAware {
 
+	private ServletContext servletContext;
+	
 	public User greetServer(String user) {
 		String serverInfo = getServletContext().getServerInfo();
-		String userAgent = getThreadLocalRequest().getHeader("User-Agent");
-		return new User(user, "Hello, " + user + "!<br><br>I am running " + serverInfo
-				+ ".<br><br>It looks like you are using:<br>" + userAgent);
+		return new User(user, "Hello my dear, " + user + "!<br><br>I am running " + serverInfo
+				+ ".<br>");
 	}
+
+    public ServletContext getServletContext() {
+        return servletContext;
+    }
+
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
+    }
 }
